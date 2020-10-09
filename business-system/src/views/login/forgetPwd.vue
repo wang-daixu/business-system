@@ -1,8 +1,8 @@
 <template>
-  <div class="register">
+  <div class="forgetPwd">
     <div class="inp">
       <el-input
-        placeholder="用户名"
+        placeholder="请输入用户名"
         v-model="name"
         clearable
         :maxlength="11"
@@ -34,35 +34,27 @@
         class="password"
         @keyup.enter.native="loginBtn"
       ></el-input>
-      <el-input
-        placeholder="请输入注册码"
-        v-model="registerCode"
-        clearable
-        class="registerCode"
-      >
-      </el-input>
     </div>
     <div class="btnBox">
       <span @click="skip('返回登录')">返回登录</span>
-      <span @click="skip('注册')">获取注册码</span>
+      <span @click="skip('注册')">加入我们?立即注册</span>
     </div>
     <div class="forgetPwdBtn" @click="forgetPwdBtn">
-      <el-button type="primary" round>立即注册</el-button>
+      <el-button type="primary" round>修改密码</el-button>
     </div>
   </div>
 </template>
 
 <script>
-import { getCaptcha, registerUser } from "@/api/login";
+import { getPwdCaptcha, updatePassword } from "@/api/login";
 export default {
   data() {
     return {
       name: "",
       email: "",
-      finalEmail: "", //最后保存的邮箱
+      finalEmail: "",   //最后保存的邮箱
       password: "",
       password2: "",
-      registerCode: "",
       getCaptchaTxt: "获取验证码",
       captcha: "", //验证码
       emailPlaceholder: "输入邮箱",
@@ -84,17 +76,15 @@ export default {
         this.$message.error("新密码必须由 4-16位字母、数字、特殊符号线组成!");
       } else if (this.password !== this.password2) {
         this.$message.error("两次密码不一致,请重新输入!");
-      } else if (this.registerCode !== "王建炜天下第一帅") {
-        this.$message.error("无效的非法注册码!");
       } else {
-        registerUser(this.name, this.finalEmail, this.password).then(res => {
+        updatePassword(this.name, this.finalEmail, this.password).then(res => {
           if (res.data.code === 200) {
             this.$message({
-              message: "注册成功,快去登录吧!",
+              message: "密码修改成功,快去登录吧!",
               type: "success"
             });
           } else {
-            this.$message.error("注册失败!");
+            this.$message.error('用户名与邮箱不匹配!');
           }
         });
       }
@@ -102,11 +92,13 @@ export default {
 
     getCaptchaBtn() {
       //获取验证码按钮
-      if (this.email === "" && !this.isGetCaptcha) {
+      if (this.name === "") {
+        this.$message.error("用户名不能为空!");
+      } else if (this.email === "" && !this.isGetCaptcha) {
         this.$message.error("邮箱不能为空!");
       } else {
         let email = this.finalEmail === "" ? this.email : this.finalEmail;
-        getCaptcha(email).then(res => {
+        getPwdCaptcha(this.name, email).then(res => {
           if (res.data.code === 200) {
             this.$message({
               message: "验证码已发送,请及时填写!",
@@ -143,7 +135,7 @@ export default {
       if (e === "返回登录") {
         this.$router.replace({ name: "Login" });
       } else {
-        alert("联系QQ:2064889594");
+        this.$router.replace({ name: "Register" });
       }
     }
   }
@@ -151,7 +143,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.register {
+.forgetPwd {
   width: 80%;
   .inp /deep/ .el-input__inner {
     border-radius: 25px;
@@ -175,8 +167,7 @@ export default {
     justify-content: space-between;
     align-items: center;
   }
-  .password,
-  .registerCode {
+  .password {
     margin-top: 20px;
   }
   .btnBox {

@@ -1,15 +1,16 @@
-import { createApp } from "vue";
+import Vue from "vue";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
-import Antd from "ant-design-vue";
-import "ant-design-vue/dist/antd.css";
+import ElementUI from "element-ui";
+import "element-ui/lib/theme-chalk/index.css";
 
-const app = createApp();
-app.config.productionTip = false;
+Vue.use(ElementUI);
 
-createApp(App)
-  .use(Antd)
-  .use(store)
-  .use(router)
-  .mount("#app");
+Vue.config.productionTip = false;
+
+new Vue({
+  router,
+  store,
+  render: h => h(App)
+}).$mount("#app");

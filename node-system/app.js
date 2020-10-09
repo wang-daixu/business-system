@@ -5,7 +5,9 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
-
+const static = require('koa-static');
+const koaBody = require('koa-body');
+const path = require("path");
 const index = require('./routes/index')
 const users = require('./routes/users')
 
@@ -41,4 +43,20 @@ app.on('error', (err, ctx) => {
   console.error('server error', err, ctx)
 });
 
+//配置静态文件路由
+app.use(static("./public/"));
+
+app.use(koaBody({
+  multipart:true, // 支持文件上传
+  // encoding:'gzip',
+  formidable:{
+    uploadDir:path.join(__dirname,'public/uploads/'), // 设置文件上传目录
+    keepExtensions: true,    // 保持文件的后缀
+    maxFieldsSize:2 * 1024 * 1024, // 文件上传大小
+    onFileBegin:(name,file) => { // 文件上传前的设置
+      // console.log(`name: ${name}`);
+      // console.log(file);
+    },
+  }
+}));
 module.exports = app
