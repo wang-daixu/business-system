@@ -44,9 +44,10 @@ export default {
         this.$message.error("密码不能为空!");
       } else {
         login(this.name, this.password).then(res => {
-          console.log(res.data)
           if (res.data.code === 200) {
             localStorage.setItem('token',res.data.data.token)
+            localStorage.setItem('userName',this.name)
+            localStorage.setItem('userId',res.data.data.userId)
             this.$router.replace({name:'Console'})
           }else{
             this.$message.error("用户名或密码输入错误!");
@@ -66,11 +67,11 @@ export default {
 </script>
 <style lang="scss" scoped>
 .login {
-  width: 80%;
+  width: 70%;
   .inp /deep/ .el-input__inner {
     border-radius: 25px;
     background-color: #0e6aae;
-    border: 2px solid #5bd0e8;
+    border: 4px solid #5bd0e8;
     color: white;
     height: 50px;
   }

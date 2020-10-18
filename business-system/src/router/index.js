@@ -3,14 +3,12 @@ import VueRouter from "vue-router";
 
 Vue.use(VueRouter);
 
-const routes = [
-  {
+const routes = [{
     path: "/",
     name: "LoginIndex",
     component: () => import("@/views/Login/index.vue"),
     redirect: "/login",
-    children: [
-      {
+    children: [{
         path: "/login",
         name: "Login",
         component: () => import("@/views/Login/login.vue")
@@ -30,7 +28,76 @@ const routes = [
   {
     path: "/console",
     name: "Console",
-    component: () => import("@/views/Console/console.vue")
+    component: () => import("@/views/Console/console.vue"),
+    redirect: "/product",
+    children: [{
+        path: "/product",
+        name: "Product",
+        component: () => import("@/views/Console/Product/product.vue")
+      },
+      {
+        path: "/addProduct",
+        name: "AddProduct",
+        component: () => import("@/views/Console/Product/addProduct.vue")
+      },
+      {
+        path: "/classify",
+        name: "Classify",
+        component: () => import("@/views/Console/Product/classify.vue")
+      },
+      {
+        path: "/orderForm",
+        name: "OrderForm",
+        component: () => import("@/views/Console/OrderForm/orderForm.vue")
+      },
+      {
+        path: "/addOrderForm",
+        name: "AddOrderForm",
+        component: () => import("@/views/Console/OrderForm/addOrderForm.vue")
+      },
+      {
+        path: "/member",
+        name: "Member",
+        component: () => import("@/views/Console/Member/member.vue")
+      },
+      {
+        path: "/addMember",
+        name: "AddMember",
+        component: () => import("@/views/Console/Member/addMember.vue")
+      },
+      {
+        path: "/integral",
+        name: "Integral",
+        component: () => import("@/views/Console/Integral/integral.vue")
+      },
+      {
+        path: "/record",
+        name: "Record",
+        component: () => import("@/views/Console/Integral/record.vue")
+      },
+      {
+        path: "/dayStatement",
+        name: "DayStatement",
+        component: () => import("@/views/Console/IncomeStatistics/dayStatement.vue")
+      }, {
+        path: "/monthStatement",
+        name: "MonthStatement",
+        component: () => import("@/views/Console/IncomeStatistics/monthStatement.vue")
+      }, {
+        path: "/yearStatement",
+        name: "YearStatement",
+        component: () => import("@/views/Console/IncomeStatistics/yearStatement.vue")
+      },{
+        path: "/operatingRecord",
+        name: "OperatingRecord",
+        component: () => import("@/views/Console/System/operatingRecord.vue")
+      },
+      {
+        path: "/changePwd",
+        name: "ChangePwd",
+        component: () => import("@/views/Console/System/changePwd.vue")
+      }
+    ]
   }
 ];
 
@@ -39,15 +106,15 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes
 });
-router.beforeEach((to,from,next)=>{
-  if(localStorage.getItem("token")){//判断是否需要登录
+router.beforeEach((to, from, next) => {
+  if (localStorage.getItem("token")) { //判断是否需要登录
+    next()
+  } else {
+    if (to.name !== "Login" && to.name !== "ForgetPwd" && to.name !== "Register") {
+      next("/login")
+    } else {
       next()
-  }else{
-      if(to.name!=="Login"&&to.name!=="ForgetPwd"&&to.name!=="Register"){
-        next("/login")
-      }else{
-        next()
-      }
+    }
   }
 });
 export default router;

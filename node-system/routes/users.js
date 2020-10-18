@@ -13,19 +13,11 @@ router.prefix('/user')
  */
 router.post('/login', async (ctx, next) => {
   let option = ctx.request.body; //接收参数
-  // let tokenLegal = await judgeToken(ctx.headers.token)
-  // if(tokenLegal.code===-1){
-  //   ctx.body={
-  //     code:-1,
-  //     msg:"token不合法,请重新登录"
-  //   }
-  //   return
-  // }
-
   let sql = `SELECT * FROM user WHERE name="${option.name}" and password="${md5(option.password)}"`;
   await query(sql).then((results) => {
-    if (results.length !== 0) {
-      let token = jwt.sign({
+    if (results.length >= 0) {
+      let token = jwt.sign({    //生成token
+        userId:results[0].id,
         name: option.name,
         password: md5(option.password)
       }, TOKEN_KEY, {
@@ -35,6 +27,7 @@ router.post('/login', async (ctx, next) => {
         code: 200,
         msg: "登录成功",
         data: {
+          userId:results[0].id,
           token: token
         }
       };
@@ -83,7 +76,7 @@ router.post('/changePassword', async (ctx, next) => {
   let option = ctx.request.body; //接收参数
   let sql = `UPDATE user SET password="${md5(option.password)}" WHERE name="${option.name}" and email="${option.email}"`;
   await query(sql).then((results) => {
-    if (results.affectedRows !== 0) {
+    if (results.affectedRows > 0) {
       ctx.body = {
         code: 200,
         msg: "密码修改成功!",

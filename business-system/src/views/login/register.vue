@@ -152,11 +152,11 @@ export default {
 
 <style lang="scss" scoped>
 .register {
-  width: 80%;
+  width: 70%;
   .inp /deep/ .el-input__inner {
     border-radius: 25px;
     background-color: #0e6aae;
-    border: 2px solid #5bd0e8;
+    border: 4px solid #5bd0e8;
     color: white;
     height: 50px;
   }

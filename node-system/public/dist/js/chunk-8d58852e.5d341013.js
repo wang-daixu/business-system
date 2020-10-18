@@ -1,0 +1,2 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-8d58852e"],{"50c4f":function(n,e,c){"use strict";c.r(e);var t=function(){var n=this,e=n.$createElement;n._self._c;return n._m(0)},a=[function(){var n=this,e=n.$createElement,c=n._self._c||e;return c("div",[c("h1",[n._v("兑换记录")])])}],r=(c("c567"),c("2877")),u={},i=Object(r["a"])(u,t,a,!1,null,"4442a6e3",null);e["default"]=i.exports},a4c1:function(n,e,c){},c567:function(n,e,c){"use strict";var t=c("a4c1"),a=c.n(t);a.a}}]);
+//# sourceMappingURL=chunk-8d58852e.5d341013.js.map

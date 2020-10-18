@@ -25,6 +25,9 @@ service.interceptors.request.use(
 // 添加响应拦截器
 service.interceptors.response.use(
   function(response) {
+    // if(response.data){
+    //   localStorage.clear();
+    // }
     // 对响应数据做点什么
     return response;
   },

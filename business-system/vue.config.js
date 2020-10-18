@@ -22,16 +22,16 @@ module.exports = {
         pathRewrite: {
           "^/": ""
         }
+      },
+      "/console": {
+        target: "http://127.0.0.1:3000",
+        changeOrigin: true,
+        // ws: true,//websocket支持
+        secure: false,
+        pathRewrite: {
+          "^/": ""
+        }
       }
-      // "/api2": {
-      //     target: "http://172.12.12.12:2018",
-      //     changeOrigin: true,
-      //     //ws: true,//websocket支持
-      //     secure: false,
-      //     pathRewrite: {
-      //         "^/api2": "/"
-      //     }
-      // }
     }
   }
 };

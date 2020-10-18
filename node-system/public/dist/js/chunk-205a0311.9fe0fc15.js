@@ -1,0 +1,2 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-205a0311"],{"3f2a":function(n,t,e){"use strict";e.r(t);var a=function(){var n=this,t=n.$createElement;n._self._c;return n._m(0)},c=[function(){var n=this,t=n.$createElement,e=n._self._c||t;return e("div",[e("h1",[n._v("操作记录")])])}],r=(e("5d00"),e("2877")),u={},i=Object(r["a"])(u,a,c,!1,null,"984ddfda",null);t["default"]=i.exports},"5d00":function(n,t,e){"use strict";var a=e("62da"),c=e.n(a);c.a},"62da":function(n,t,e){}}]);
+//# sourceMappingURL=chunk-205a0311.9fe0fc15.js.map
