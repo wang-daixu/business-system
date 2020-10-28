@@ -146,7 +146,7 @@ export async function addProductClassifyList() {
   return data;
 }
 //添加产品
-export async function addProduct(product_name, product_detailed, purchasing_price, selling_price, inventory, classify_id, product_img) {
+export async function addProduct(product_name, product_detailed, purchasing_price, selling_price, inventory, classify_id,exchangeIntegral, product_img) {
   const data = service.request({
     method: "get",
     url: "/console/addProduct",
@@ -157,13 +157,14 @@ export async function addProduct(product_name, product_detailed, purchasing_pric
       selling_price,
       inventory,
       classify_id,
+      exchangeIntegral,
       product_img
     }
   });
   return data;
 }
 //编辑产品
-export async function revampProduct(product_name, product_detailed, purchasing_price, selling_price, classify_id, product_id) {
+export async function revampProduct(product_name, product_detailed, purchasing_price, selling_price, classify_id, product_id,exchangeIntegral) {
   const data = service.request({
     method: "get",
     url: "/console/revampProduct",
@@ -173,7 +174,8 @@ export async function revampProduct(product_name, product_detailed, purchasing_p
       purchasing_price,
       selling_price,
       classify_id,
-      product_id
+      product_id,
+      exchangeIntegral
     }
   });
   return data;

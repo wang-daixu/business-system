@@ -71,26 +71,14 @@
           </el-table-column>
           <el-table-column prop="classify" label="类别" width="180">
           </el-table-column>
+          <el-table-column prop="exchangeIntegral" label="获得积分" width="100">
+          </el-table-column>
           <el-table-column prop="product_img" label="产品图片" width="130">
             <template slot-scope="img_scope">
-              <!-- <el-image
-                style="width: 100px; height: 100px"
-                :src="
-                  'http://qi4h218o0.hd-bkt.clouddn.com/' +
-                    img_scope.row.product_img
-                "
-                :preview-src-list="[
-                  'http://qi4h218o0.hd-bkt.clouddn.com/' +
-                    img_scope.row.product_img
-                ]"
-                fit="cover"
-              >
-              </el-image> -->
               <div
                 class="imagePreview"
                 @click="handleImagePreview(img_scope.$index, img_scope.row)"
               >
-                <!-- {{ img_scope.row.product_img }} -->
                 点击查看
               </div>
             </template>
@@ -202,6 +190,12 @@
             </el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="获得积分">
+          <el-input
+            v-model="formLabelAlign.exchangeIntegral"
+            class="price"
+          ></el-input>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="editBounced = false">取 消</el-button>
@@ -264,6 +258,7 @@ export default {
         selling_price: null,
         classify: null,
         classify_id: null,
+        exchangeIntegral:null,
         classifyList: []
       },
       uploadData: { key: "", token: "" }, //key为上传的文件名
@@ -368,7 +363,6 @@ export default {
     },
     handleInventory(item) {
       //改变库存是否充足状态
-      console.log(item);
       revampInventory(item.inventory, item.product_id).then(res => {
         if (res.data.code === 200) {
           this.$message({
@@ -466,6 +460,7 @@ export default {
       this.formLabelAlign.selling_price = row.selling_price;
       this.formLabelAlign.classify = row.classify;
       this.formLabelAlign.classify_id = row.classify_id;
+      this.formLabelAlign.exchangeIntegral = row.exchangeIntegral
       this.editBounced = true;
     },
     handleDelete(index, row) {
@@ -535,7 +530,8 @@ export default {
         this.formLabelAlign.purchasing_price,
         this.formLabelAlign.selling_price,
         this.formLabelAlign.classify_id,
-        this.formLabelAlign.product_id
+        this.formLabelAlign.product_id,
+        this.formLabelAlign.exchangeIntegral
       ).then(res => {
         if (res.data.code === 200) {
           this.$message({

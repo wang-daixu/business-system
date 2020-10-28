@@ -43,6 +43,9 @@
         <el-form-item label="产品售价">
           <el-input v-model="formLabelAlign.selling_price" class="price"></el-input>
         </el-form-item>
+         <el-form-item label="获得积分">
+          <el-input v-model="formLabelAlign.exchangeIntegral" class="price"></el-input>
+        </el-form-item>
         <el-form-item label="库存状态">
           <el-radio v-model="formLabelAlign.inventory" :label="0"
             >充足</el-radio
@@ -96,6 +99,7 @@ export default {
         selling_price: null,
         inventory: 0,
         classify: null,
+        exchangeIntegral:null,
         classifyList: []
       }
     };
@@ -132,6 +136,9 @@ export default {
       if (!this.formLabelAlign.classify) {
         this.formLabelAlign.classify = 0;
       }
+      if (!this.formLabelAlign.exchangeIntegral) {
+        this.formLabelAlign.exchangeIntegral = 0;
+      }
       addProduct(
         this.formLabelAlign.product_name,
         this.formLabelAlign.product_detailed,
@@ -139,6 +146,7 @@ export default {
         this.formLabelAlign.selling_price,
         this.formLabelAlign.inventory,
         this.formLabelAlign.classify,
+        this.formLabelAlign.exchangeIntegral,
         this.imageUrl
       ).then(res => {
         if (res.data.code === 200) {

@@ -48,9 +48,6 @@
                 <el-menu-item-group>
                   <el-menu-item index="member">所有会员</el-menu-item>
                 </el-menu-item-group>
-                <el-menu-item-group>
-                  <el-menu-item index="addMember">注册会员</el-menu-item>
-                </el-menu-item-group>
               </el-submenu>
               <el-submenu index="4">
                 <template slot="title">
@@ -162,11 +159,12 @@ export default {
       font-weight: bold;
     }
     div:nth-child(2) {
-      font-size: 16px;
-      color: #4cd7d1;
+      font-size: 20px;
+      color: black;
       i {
         font-size: 18px;
         margin-left: 10px;
+        color: #4cd7d1;
         cursor: pointer;
       }
     }

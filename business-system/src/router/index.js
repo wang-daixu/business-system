@@ -61,11 +61,6 @@ const routes = [{
         component: () => import("@/views/Console/Member/member.vue")
       },
       {
-        path: "/addMember",
-        name: "AddMember",
-        component: () => import("@/views/Console/Member/addMember.vue")
-      },
-      {
         path: "/integral",
         name: "Integral",
         component: () => import("@/views/Console/Integral/integral.vue")

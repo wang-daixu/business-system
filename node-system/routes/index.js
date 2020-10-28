@@ -1,10 +1,8 @@
 const router = require('koa-router')()
 const query = require("../module/query");
-const md5 = require('md5');
-const jwt = require('jsonwebtoken')
-const TOKEN_KEY = "dhgioh1dIO114AAH7Si9osh8oK5AJ5546D211464A"
 const judgeToken = require('../module/judgeToken')
 let qiniu = require('qiniu');
+var moment = require('moment');
 
 let config = {
   "AK": "gB3IVQ96HMuVEOkMeQ5CSSRJjvoAlnbpNWWN6rbO",
@@ -101,7 +99,7 @@ router.get('/productList', async (ctx, next) => {
     return
   } else {
     let option = ctx.query
-    let sql = `SELECT product.classify_id,product.product_img,product.product_id,product.product_name,product.product_detailed,product.purchasing_price,product.selling_price,classify.classify_name AS classify,product.inventory,(SELECT COUNT(*) from product where product.user_id=${tokenInfo.userId}) as total FROM product LEFT JOIN classify ON product.classify_id =classify.classify_id WHERE product.user_id=${tokenInfo.userId} ORDER BY product_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`;
+    let sql = `SELECT product.exchangeIntegral,product.classify_id,product.product_img,product.product_id,product.product_name,product.product_detailed,product.purchasing_price,product.selling_price,classify.classify_name AS classify,product.inventory,(SELECT COUNT(*) from product where product.user_id=${tokenInfo.userId}) as total FROM product LEFT JOIN classify ON product.classify_id =classify.classify_id WHERE product.user_id=${tokenInfo.userId} ORDER BY product_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`;
     await query(sql).then((results) => {
       if (results.length > 0) {
         results.map(item => {
@@ -137,7 +135,12 @@ router.get('/searchProductResult', async (ctx, next) => {
     return
   } else {
     let option = ctx.query
-    let sql = `SELECT product.classify_id,product.product_img,product.product_id,product.product_name,product.product_detailed,product.purchasing_price,product.selling_price,classify.classify_name AS classify,product.inventory,(SELECT COUNT(*) from product where product.user_id = ${tokenInfo.userId} AND product.product_name REGEXP '${option.searchName}') as total FROM product LEFT JOIN classify ON product.classify_id =classify.classify_id WHERE product.user_id = ${tokenInfo.userId} AND product.product_name REGEXP '${option.searchName}' ORDER BY product_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`;
+    let sql;
+    if (option.searchName === "") {
+      sql = `SELECT product.exchangeIntegral,product.classify_id,product.product_img,product.product_id,product.product_name,product.product_detailed,product.purchasing_price,product.selling_price,classify.classify_name AS classify,product.inventory,(SELECT COUNT(*) from product where product.user_id=${tokenInfo.userId}) as total FROM product LEFT JOIN classify ON product.classify_id =classify.classify_id WHERE product.user_id=${tokenInfo.userId} ORDER BY product_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`;
+    } else {
+      sql = `SELECT product.exchangeIntegral,product.classify_id,product.product_img,product.product_id,product.product_name,product.product_detailed,product.purchasing_price,product.selling_price,classify.classify_name AS classify,product.inventory,(SELECT COUNT(*) from product where product.user_id = ${tokenInfo.userId} AND product.product_name REGEXP '${option.searchName}') as total FROM product LEFT JOIN classify ON product.classify_id =classify.classify_id WHERE product.user_id = ${tokenInfo.userId} AND product.product_name REGEXP '${option.searchName}' ORDER BY product_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`;
+    }
     await query(sql).then((results) => {
       if (results.length > 0) {
         results.map(item => {
@@ -175,9 +178,9 @@ router.get('/classifyResult', async (ctx, next) => {
     let option = ctx.query
     let sql;
     if (option.classify === "0") {
-      sql = `SELECT product.classify_id,product.product_img,product.product_id,product.product_name,product.product_detailed,product.purchasing_price,product.selling_price,classify.classify_name AS classify,product.inventory FROM product LEFT JOIN classify ON product.classify_id =classify.classify_id WHERE product.user_id = ${tokenInfo.userId} AND product.classify_id=0 ORDER BY product_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`;
+      sql = `SELECT product.exchangeIntegral,product.classify_id,product.product_img,product.product_id,product.product_name,product.product_detailed,product.purchasing_price,product.selling_price,classify.classify_name AS classify,product.inventory FROM product LEFT JOIN classify ON product.classify_id =classify.classify_id WHERE product.user_id = ${tokenInfo.userId} AND product.classify_id=0 ORDER BY product_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`;
     } else {
-      sql = `SELECT product.classify_id,product.product_img,product.product_id,product.product_name,product.product_detailed,product.purchasing_price,product.selling_price,classify.classify_name AS classify,product.inventory FROM product LEFT JOIN classify ON product.classify_id =classify.classify_id WHERE product.user_id = ${tokenInfo.userId} AND classify.classify_id='${option.classify}' ORDER BY product_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`;
+      sql = `SELECT product.exchangeIntegral,product.classify_id,product.product_img,product.product_id,product.product_name,product.product_detailed,product.purchasing_price,product.selling_price,classify.classify_name AS classify,product.inventory FROM product LEFT JOIN classify ON product.classify_id =classify.classify_id WHERE product.user_id = ${tokenInfo.userId} AND classify.classify_id='${option.classify}' ORDER BY product_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`;
     }
     await query(sql).then((results) => {
       if (results.length > 0) {
@@ -435,8 +438,8 @@ router.get('/addProduct', async (ctx, next) => {
     return
   } else {
     let option = ctx.query
-    let sql = `INSERT INTO product (user_id,product_name,product_detailed,purchasing_price,selling_price,inventory,classify_id,product_img) VALUES (?,?,?,?,?,?,?,?)`;
-    let values = [tokenInfo.userId, option.product_name, option.product_detailed, option.purchasing_price, option.selling_price, option.inventory, option.classify_id, option.product_img]
+    let sql = `INSERT INTO product (user_id,product_name,product_detailed,purchasing_price,selling_price,inventory,classify_id,exchangeIntegral,product_img) VALUES (?,?,?,?,?,?,?,?,?)`;
+    let values = [tokenInfo.userId, option.product_name, option.product_detailed, option.purchasing_price, option.selling_price, option.inventory, option.classify_id, option.exchangeIntegral, option.product_img]
     await query(sql, values).then((results) => {
       if (results.affectedRows > 0) {
         ctx.body = {
@@ -463,8 +466,8 @@ router.get('/revampProduct', async (ctx, next) => {
     return
   } else {
     let option = ctx.query
-    let sql = `update product set product_name=?,product_detailed=?,purchasing_price=?,selling_price=?,classify_id=? where product_id = ?`;
-    let values = [option.product_name, option.product_detailed, option.purchasing_price, option.selling_price, option.classify_id, option.product_id]
+    let sql = `update product set product_name=?,product_detailed=?,purchasing_price=?,selling_price=?,classify_id=?,exchangeIntegral=? where product_id = ?`;
+    let values = [option.product_name, option.product_detailed, option.purchasing_price, option.selling_price, option.classify_id, option.exchangeIntegral, option.product_id]
     await query(sql, values).then((results) => {
       if (results.affectedRows > 0) {
         ctx.body = {
@@ -517,12 +520,247 @@ router.get('/revampProductImg', async (ctx, next) => {
     })
   }
 })
-
-
-
-
-
-
+//添加订单
+router.get('/addOrderForm', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    if (option.member_phone === "") { //没有会员直接添加
+      await query(`INSERT INTO order_form (user_id,product_id,kind) VALUES (${tokenInfo.userId},${option.product_id},"${option.kind}")`).then((results) => {
+        if (results.affectedRows > 0) {
+          ctx.body = {
+            code: 200,
+            msg: "订单添加成功",
+            data: {}
+          };
+        }
+      })
+    } else { //有会员的
+      let results = await query(`SELECT * FROM member WHERE phone_number = '${option.member_phone}'`)
+      if (results.length === 0) {
+        ctx.body = {
+          code: 201,
+          msg: "该会员手机号不存在!"
+        };
+      } else {
+        let res = await query(`INSERT INTO order_form (user_id,product_id,kind,member_phone,exchangeIntegral) VALUES (${tokenInfo.userId},${option.product_id},"${option.kind}","${option.member_phone}","${option.exchangeIntegral}")`)
+        let res2 = await query(`UPDATE member SET integral = ${Number(results[0].integral)+Number(option.exchangeIntegral)} WHERE phone_number = ${option.member_phone}`)
+        if (res.affectedRows > 0 && res2.affectedRows > 0) {
+          ctx.body = {
+            code: 200,
+            msg: "订单添加成功",
+            data: {
+              integral: Number(results[0].integral) + Number(option.exchangeIntegral)
+            }
+          };
+        }
+      }
+    }
+  }
+})
+//全部订单
+router.get('/orderFormList', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    let sql = `SELECT *,(SELECT COUNT(*) FROM order_form  WHERE user_id =${tokenInfo.userId}) as total FROM order_form  LEFT JOIN product ON order_form.product_id=product.product_id WHERE order_form.user_id=${tokenInfo.userId} ORDER BY order_form.orderForm_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`;
+    await query(sql).then((results) => {
+      results.map(item => {
+        item.create_time = moment(item.create_time).format("YYYY-MM-DD HH:mm:ss")
+      })
+      if (results.length > 0) {
+        ctx.body = {
+          code: 200,
+          msg: "全部订单查询成功",
+          data: {
+            orderFormList: results,
+            total: results[0].total
+          }
+        };
+      } else {
+        ctx.body = {
+          code: 201,
+          msg: "全部订单查询失败"
+        };
+      }
+    })
+  }
+})
+//删除订单
+router.get('/deleteOrderForm', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    if (option.member_phone === "") {
+      await query(`delete from order_form where orderForm_id = ${option.orderForm_id}`).then(results => {
+        console.log(1111111)
+        console.log(results)
+        if (results.affectedRows > 0) {
+          ctx.body = {
+            code: 200,
+            msg: "删除成功"
+          };
+        } else {
+          ctx.body = {
+            code: 201,
+            msg: "删除失败"
+          };
+        }
+      })
+    } else {
+      await query(`delete from order_form where orderForm_id = ${option.orderForm_id};
+      UPDATE member SET integral=integral-${option.exchangeIntegral} WHERE phone_number='${option.member_phone}'`).then(results => {
+        console.log(2222222)
+        console.log(results)
+        if (results[0].affectedRows > 0, results[1].affectedRows > 0) {
+          ctx.body = {
+            code: 200,
+            msg: "删除成功"
+          };
+        } else {
+          ctx.body = {
+            code: 201,
+            msg: "删除失败"
+          };
+        }
+      })
+    }
+  }
+})
+//查询会员
+router.get('/memberList', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    let results = await query(`SELECT *,(SELECT COUNT(*) FROM member WHERE user_id=${tokenInfo.userId}) as total FROM member WHERE user_id=${tokenInfo.userId} ORDER BY member_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`)
+    for (let i = 0; i < results.length; i++) {
+      results[i].create_time = moment(results[i].create_time).format("YYYY-MM-DD HH:mm:ss")
+      let res = await query(`SELECT COUNT(*) as count FROM order_form WHERE member_phone="${results[i].phone_number}" AND user_id=${tokenInfo.userId}`)
+      results[i].count = res[0].count
+    }
+    ctx.body = {
+      code: 200,
+      msg: "查找成功",
+      data: {
+        memberList: results,
+        total: results[0].total
+      }
+    }
+  }
+})
+//删除会员
+router.get('/deleteMember', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    let sql = `delete from member where member_id = ${option.member_id}`;
+    await query(sql).then((results) => {
+      if (results.affectedRows > 0) {
+        ctx.body = {
+          code: 200,
+          msg: "删除成功"
+        };
+      } else {
+        ctx.body = {
+          code: 201,
+          msg: "删除失败"
+        };
+      }
+    })
+  }
+})
+//根据手机号查询会员
+router.get('/searchMember', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    let results = await query(`SELECT * FROM member WHERE phone_number="${option.phone_number}" AND user_id=${tokenInfo.userId}`)
+    if (results.length !== 0) {
+      results[0].create_time = moment(results[0].create_time).format("YYYY-MM-DD HH:mm:ss")
+      let res = await query(`SELECT COUNT(*) as count FROM order_form WHERE member_phone="${results[0].phone_number}" AND user_id=${tokenInfo.userId}`)
+      results[0].count = res[0].count
+    }
+    if (results.length === 0) {
+      ctx.body = {
+        code: 201,
+        msg: "未查到该会员信息!"
+      }
+    } else {
+      ctx.body = {
+        code: 200,
+        msg: "查找成功",
+        data: {
+          member: results,
+          total: results.length
+        }
+      }
+    }
+  }
+})
+//添加会员
+router.get('/addMember', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    let sql = `INSERT INTO member (user_id,member_name,phone_number) VALUES (?,?,?)`;
+    let values = [tokenInfo.userId, option.member_name, option.phone_number]
+    await query(sql, values).then((results) => {
+      if (results.affectedRows > 0) {
+        ctx.body = {
+          code: 200,
+          msg: "添加成功"
+        };
+      } else {
+        ctx.body = {
+          code: 201,
+          msg: "添加失败"
+        };
+      }
+    })
+  }
+})
 
 
 
