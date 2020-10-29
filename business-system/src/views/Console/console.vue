@@ -55,7 +55,7 @@
                   <span>积分系统</span>
                 </template>
                 <el-menu-item-group>
-                  <el-menu-item index="integral">可兑换列表</el-menu-item>
+                  <el-menu-item index="integral">产品兑换</el-menu-item>
                 </el-menu-item-group>
                 <el-menu-item-group>
                   <el-menu-item index="record">兑换记录</el-menu-item>

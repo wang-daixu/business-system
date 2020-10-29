@@ -761,14 +761,288 @@ router.get('/addMember', async (ctx, next) => {
     })
   }
 })
-
-
-
-
-
-
-
-
+//添加兑换产品
+router.get('/addIntegralProduct', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    let sql = `INSERT INTO convertibility (product_name,conversion_integral,user_id) VALUES ('${option.product_name}',${option.conversion_integral},${tokenInfo.userId})`;
+    console.log(sql)
+    await query(sql).then((results) => {
+      if (results.affectedRows > 0) {
+        ctx.body = {
+          code: 200,
+          msg: "添加成功"
+        };
+      } else {
+        ctx.body = {
+          code: 201,
+          msg: "添加失败"
+        };
+      }
+    })
+  }
+})
+//获取兑换产品列表
+router.get('/integralProductList', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    let sql = `SELECT *,(SELECT count(*) FROM convertibility WHERE user_id=${tokenInfo.userId}) as total FROM convertibility WHERE user_id=${tokenInfo.userId} ORDER BY convertibility_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`;
+    await query(sql).then((results) => {
+      if (results.length > 0) {
+        ctx.body = {
+          code: 200,
+          msg: "获取成功",
+          data: {
+            integralProductList: results,
+            total: results[0].total
+          }
+        };
+      } else {
+        ctx.body = {
+          code: 201,
+          msg: "获取失败"
+        };
+      }
+    })
+  }
+})
+//修改兑换产品
+router.get('/revampIntegralProduct', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    let sql = `update convertibility set product_name='${option.product_name}',conversion_integral=${option.conversion_integral} where convertibility_id = ${option.convertibility_id}`;
+    await query(sql).then((results) => {
+      if (results.affectedRows > 0) {
+        ctx.body = {
+          code: 200,
+          msg: "修改成功"
+        };
+      } else {
+        ctx.body = {
+          code: 201,
+          msg: "修改失败"
+        };
+      }
+    })
+  }
+})
+//删除兑换产品
+router.get('/deleteIntegralProduct', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    let sql = `delete from convertibility where convertibility_id = ${option.convertibility_id}`;
+    await query(sql).then((results) => {
+      if (results.affectedRows > 0) {
+        ctx.body = {
+          code: 200,
+          msg: "删除成功"
+        };
+      } else {
+        ctx.body = {
+          code: 201,
+          msg: "删除失败"
+        };
+      }
+    })
+  }
+})
+//搜索兑换产品
+router.get('/searchIntegralProduct', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    let results = await query(`SELECT * FROM convertibility WHERE product_name="${option.product_name}" AND user_id=${tokenInfo.userId}`)
+    if (results.length === 0) {
+      ctx.body = {
+        code: 201,
+        msg: "未查到该会员信息!"
+      }
+    } else {
+      ctx.body = {
+        code: 200,
+        msg: "查找成功",
+        data: {
+          integralProductList: results,
+          total: results.length
+        }
+      }
+    }
+  }
+})
+//兑换产品
+router.get('/conversion', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    //查询该会员手机号是否存在
+    let results = await query(`SELECT * FROM member WHERE phone_number="${option.phone_number}" AND user_id=${tokenInfo.userId}`)
+    if (results.length > 0) {
+      let integral = results[0].integral //得到兑换前的积分
+      if (integral - Number(option.integral) < 0) { //如果兑换后的积分小于0那么设置为0
+        ctx.body = {
+          code: 202,
+          msg: "该会员积分不够!当前积分:" + integral
+        }
+        return
+      } else {
+        integral = integral - Number(option.integral)
+        let res = await query(`update member set integral=${integral} where phone_number = "${option.phone_number}"`)
+        if (res.affectedRows > 0) {
+          await query(`INSERT INTO for_record (user_id,convertibility_id,phone_number) VALUES (${tokenInfo.userId},${option.convertibility_id},${option.phone_number})`)
+          ctx.body = {
+            code: 200,
+            msg: "兑换成功!积分剩余:" + integral
+          };
+        } else {
+          ctx.body = {
+            code: 203,
+            msg: "服务器异常,请稍后再试!"
+          };
+          return
+        }
+      }
+    } else {
+      ctx.body = {
+        code: 201,
+        msg: "没有该会员!"
+      }
+    }
+  }
+})
+//全部兑换记录
+router.get('/forRecord', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    let sql = `SELECT *,(SELECT COUNT(*) FROM for_record WHERE user_id=${tokenInfo.userId}) as total FROM for_record LEFT JOIN convertibility ON for_record.convertibility_id=convertibility.convertibility_id WHERE for_record.user_id=${tokenInfo.userId} ORDER BY for_record.record_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`;
+    await query(sql).then((results) => {
+      if (results.length > 0) {
+        results.map(item => {
+          item.record_time = moment(item.record_time).format("YYYY-MM-DD HH:mm:ss")
+        })
+        ctx.body = {
+          code: 200,
+          msg: "查询成功",
+          data: {
+            forRecordList: results,
+            total: results[0].total
+          }
+        };
+      } else {
+        ctx.body = {
+          code: 201,
+          msg: "未查询到相关产品"
+        };
+      }
+    })
+  }
+})
+//搜索兑换记录
+router.get('/searchForRecord', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    let results = await query(`SELECT *,(SELECT COUNT(*) FROM for_record WHERE user_id=${tokenInfo.userId} and phone_number="${option.phone}") as total FROM for_record LEFT JOIN convertibility ON for_record.convertibility_id=convertibility.convertibility_id WHERE for_record.user_id=${tokenInfo.userId} and for_record.phone_number="${option.phone}" ORDER BY for_record.record_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`)
+    console.log(`SELECT *,(SELECT COUNT(*) FROM for_record WHERE user_id=${tokenInfo.userId} and phone_number="${option.phone}") as total FROM for_record LEFT JOIN convertibility ON for_record.convertibility_id=convertibility.convertibility_id WHERE for_record.user_id=${tokenInfo.userId} and for_record.phone_number="${option.phone}" ORDER BY for_record.record_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`)
+    if (results.length === 0) {
+      ctx.body = {
+        code: 201,
+        msg: "该会员没有兑换记录!"
+      }
+    } else {
+      results.map(item => {
+        item.record_time = moment(item.record_time).format("YYYY-MM-DD HH:mm:ss")
+      })
+      ctx.body = {
+        code: 200,
+        msg: "查找成功",
+        data: {
+          forRecordList: results,
+          total: results[0].total
+        }
+      }
+    }
+  }
+})
+//删除兑换记录
+router.get('/deleteForRecord', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    let sql = `delete from for_record where record_id = ${option.record_id}`;
+    await query(sql).then((results) => {
+      if (results.affectedRows > 0) {
+        ctx.body = {
+          code: 200,
+          msg: "删除成功"
+        };
+      } else {
+        ctx.body = {
+          code: 201,
+          msg: "删除失败"
+        };
+      }
+    })
+  }
+})
 
 
 

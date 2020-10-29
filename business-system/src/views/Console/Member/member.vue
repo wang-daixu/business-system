@@ -5,6 +5,7 @@
         placeholder="请输入手机号码"
         v-model="searchPhone"
         class="searchPhone"
+        @keyup.enter.native="searchBtn()"
       >
         <template slot="append">
           <el-button type="primary" icon="el-icon-search" @click="searchBtn()"
