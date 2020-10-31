@@ -132,7 +132,6 @@
   </el-container>
 </template>
 
-
 <script>
 import {
   addIntegralProduct,
@@ -176,6 +175,7 @@ export default {
             this.total = res.data.data.total;
           } else {
             this.tableData = [];
+            this.total = 0;
           }
         });
       }
@@ -215,16 +215,18 @@ export default {
         confirmButtonText: "确定",
         cancelButtonText: "取消"
       }).then(({ value }) => {
-        conversion(value, row.conversion_integral,row.convertibility_id).then(res => {
-          if (res.data.code === 200) {
-            this.$message({
-              type: "success",
-              message: res.data.msg
-            });
-          } else {
-             this.$message.error(res.data.msg);
+        conversion(value, row.conversion_integral, row.convertibility_id).then(
+          res => {
+            if (res.data.code === 200) {
+              this.$message({
+                type: "success",
+                message: res.data.msg
+              });
+            } else {
+              this.$message.error(res.data.msg);
+            }
           }
-        });
+        );
       });
     },
     //选中表格后执行
@@ -238,6 +240,7 @@ export default {
           this.total = res.data.data.total;
         } else {
           this.tableData = [];
+          this.total = 0;
         }
       });
     },

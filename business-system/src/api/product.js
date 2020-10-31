@@ -1,4 +1,12 @@
 import service from "@/utils/request";
+//获取用户token
+export async function getUserToken() {
+  const data = service.request({
+    method: "get",
+    url: "/console/userToken"
+  });
+  return data;
+}
 // 获取分类列表
 export async function getClassifyList() {
   const data = service.request({
@@ -11,9 +19,9 @@ export async function getClassifyList() {
 //产品名搜索联想
 export async function searchList(searchName) {
   if (searchName === "" || searchName === undefined) {
-    searchName = ''
+    searchName = "";
   } else {
-    searchName = searchName.replace(/\s*/g, "")
+    searchName = searchName.replace(/\s*/g, "");
   }
   const data = service.request({
     method: "get",
@@ -39,7 +47,11 @@ export async function getProductList(currentPage, pageSize) {
 }
 
 //查询搜索的产品
-export async function getSearchProductResult(searchName, currentPage, pageSize) {
+export async function getSearchProductResult(
+  searchName,
+  currentPage,
+  pageSize
+) {
   const data = service.request({
     method: "get",
     url: "/console/searchProductResult",
@@ -51,7 +63,6 @@ export async function getSearchProductResult(searchName, currentPage, pageSize) 
   });
   return data;
 }
-
 
 //查询分类的产品
 export async function getClassifyResult(classify, currentPage, pageSize) {
@@ -146,7 +157,16 @@ export async function addProductClassifyList() {
   return data;
 }
 //添加产品
-export async function addProduct(product_name, product_detailed, purchasing_price, selling_price, inventory, classify_id,exchangeIntegral, product_img) {
+export async function addProduct(
+  product_name,
+  product_detailed,
+  purchasing_price,
+  selling_price,
+  inventory,
+  classify_id,
+  exchangeIntegral,
+  product_img
+) {
   const data = service.request({
     method: "get",
     url: "/console/addProduct",
@@ -164,7 +184,15 @@ export async function addProduct(product_name, product_detailed, purchasing_pric
   return data;
 }
 //编辑产品
-export async function revampProduct(product_name, product_detailed, purchasing_price, selling_price, classify_id, product_id,exchangeIntegral) {
+export async function revampProduct(
+  product_name,
+  product_detailed,
+  purchasing_price,
+  selling_price,
+  classify_id,
+  product_id,
+  exchangeIntegral
+) {
   const data = service.request({
     method: "get",
     url: "/console/revampProduct",
@@ -181,7 +209,7 @@ export async function revampProduct(product_name, product_detailed, purchasing_p
   return data;
 }
 //修改产品图片
-export async function revampProductImg(product_img,product_id) {
+export async function revampProductImg(product_img, product_id) {
   const data = service.request({
     method: "get",
     url: "/console/revampProductImg",
@@ -192,17 +220,6 @@ export async function revampProductImg(product_img,product_id) {
   });
   return data;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 //获取七牛云上传token
 export async function getUploadToken() {

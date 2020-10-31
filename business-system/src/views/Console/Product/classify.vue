@@ -119,21 +119,21 @@ export default {
     };
   },
   created() {
-    this.getTableData(this.currentPage,this.pageSize);
+    this.getTableData(this.currentPage, this.pageSize);
   },
   methods: {
-    getTableData(currentPage,pageSize) {
-      classifyParticulars(currentPage,pageSize).then(res => {
+    getTableData(currentPage, pageSize) {
+      classifyParticulars(currentPage, pageSize).then(res => {
         if (res.data.code === 200) {
           if (!res.data.data.list[0].classify_id) {
             res.data.data.list[0].classify_id = 0;
             res.data.data.list[0].classify_name = "未分类";
           }
           this.tableData = res.data.data.list;
-          this.total = res.data.data.total
-        }else{
+          this.total = res.data.data.total;
+        } else {
           this.tableData = [];
-          this.total = 0
+          this.total = 0;
         }
       });
     },
@@ -149,7 +149,7 @@ export default {
             message: "添加成功",
             type: "success"
           });
-          this.getTableData(this.currentPage,this.pageSize);
+          this.getTableData(this.currentPage, this.pageSize);
         } else {
           this.$message.error("服务器繁忙,请稍后再试!");
         }
@@ -171,7 +171,7 @@ export default {
             message: "修改成功",
             type: "success"
           });
-          this.getTableData(this.currentPage,this.pageSize);
+          this.getTableData(this.currentPage, this.pageSize);
         } else {
           this.$message.error("服务器繁忙,请稍后再试!");
         }
@@ -179,8 +179,8 @@ export default {
       this.editBounced = false;
     },
     handleCurrentChange(val) {
-        //分页功能
-      this.getTableData(val,this.pageSize);
+      //分页功能
+      this.getTableData(val, this.pageSize);
     },
     exportExcel() {
       /* out-table关联导出的dom节点  */
@@ -219,7 +219,7 @@ export default {
               message: "删除成功!",
               type: "success"
             });
-            this.getTableData(this.currentPage,this.pageSize);
+            this.getTableData(this.currentPage, this.pageSize);
           } else {
             this.$message.error("删除失败,请稍后再试!");
           }

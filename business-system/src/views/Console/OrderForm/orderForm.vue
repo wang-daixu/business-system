@@ -60,7 +60,6 @@
   </el-container>
 </template>
 
-
 <script>
 import { orderFormList, deleteOrderForm } from "@/api/orderForm";
 export default {
@@ -84,13 +83,17 @@ export default {
   methods: {
     handleDelete(index, row) {
       //产品删除
-          console.log(row)
+      console.log(row);
       this.$confirm("此操作将删除该产品不可复原, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       }).then(() => {
-        deleteOrderForm(row.orderForm_id,row.member_phone,row.exchangeIntegral).then(res => {
+        deleteOrderForm(
+          row.orderForm_id,
+          row.member_phone,
+          row.exchangeIntegral
+        ).then(res => {
           if (res.data.code === 200) {
             this.$message({
               message: "删除成功!",

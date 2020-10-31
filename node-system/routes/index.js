@@ -1,6 +1,8 @@
 const router = require('koa-router')()
 const query = require("../module/query");
 const judgeToken = require('../module/judgeToken')
+const getDay = require('../module/util')
+const md5 = require('md5');
 let qiniu = require('qiniu');
 var moment = require('moment');
 
@@ -11,7 +13,23 @@ let config = {
 }
 
 router.prefix('/console')
-
+//获取用户token
+router.get('/userToken', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    ctx.body={
+      code:200,
+      msg:"获取成功",
+      data:ctx.headers.token
+    }
+  }
+})
 //获取产品分类列表
 router.get('/classifyList', async (ctx, next) => {
   let tokenInfo = await judgeToken(ctx.headers.token)
@@ -611,8 +629,6 @@ router.get('/deleteOrderForm', async (ctx, next) => {
     let option = ctx.query
     if (option.member_phone === "") {
       await query(`delete from order_form where orderForm_id = ${option.orderForm_id}`).then(results => {
-        console.log(1111111)
-        console.log(results)
         if (results.affectedRows > 0) {
           ctx.body = {
             code: 200,
@@ -628,8 +644,6 @@ router.get('/deleteOrderForm', async (ctx, next) => {
     } else {
       await query(`delete from order_form where orderForm_id = ${option.orderForm_id};
       UPDATE member SET integral=integral-${option.exchangeIntegral} WHERE phone_number='${option.member_phone}'`).then(results => {
-        console.log(2222222)
-        console.log(results)
         if (results[0].affectedRows > 0, results[1].affectedRows > 0) {
           ctx.body = {
             code: 200,
@@ -773,7 +787,6 @@ router.get('/addIntegralProduct', async (ctx, next) => {
   } else {
     let option = ctx.query
     let sql = `INSERT INTO convertibility (product_name,conversion_integral,user_id) VALUES ('${option.product_name}',${option.conversion_integral},${tokenInfo.userId})`;
-    console.log(sql)
     await query(sql).then((results) => {
       if (results.affectedRows > 0) {
         ctx.body = {
@@ -995,7 +1008,6 @@ router.get('/searchForRecord', async (ctx, next) => {
   } else {
     let option = ctx.query
     let results = await query(`SELECT *,(SELECT COUNT(*) FROM for_record WHERE user_id=${tokenInfo.userId} and phone_number="${option.phone}") as total FROM for_record LEFT JOIN convertibility ON for_record.convertibility_id=convertibility.convertibility_id WHERE for_record.user_id=${tokenInfo.userId} and for_record.phone_number="${option.phone}" ORDER BY for_record.record_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`)
-    console.log(`SELECT *,(SELECT COUNT(*) FROM for_record WHERE user_id=${tokenInfo.userId} and phone_number="${option.phone}") as total FROM for_record LEFT JOIN convertibility ON for_record.convertibility_id=convertibility.convertibility_id WHERE for_record.user_id=${tokenInfo.userId} and for_record.phone_number="${option.phone}" ORDER BY for_record.record_id DESC LIMIT ${(Number(option.currentPage)-1)*Number(option.pageSize)},${option.pageSize}`)
     if (results.length === 0) {
       ctx.body = {
         code: 201,
@@ -1043,12 +1055,198 @@ router.get('/deleteForRecord', async (ctx, next) => {
     })
   }
 })
+//获取单日报表
+router.get('/dayStatistics', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    let results = await query(`SELECT order_form.product_id,product.product_name FROM order_form LEFT JOIN product ON order_form.product_id=product.product_id WHERE order_form.user_id=${tokenInfo.userId} AND year(order_form.create_time ) = ${option.year} and month(order_form.create_time )= ${option.month} and day(order_form.create_time ) = ${option.day} GROUP BY order_form.product_id`)
+    if (results.length > 0) {
+      let xAxis = { //有哪些产品
+        type: "category",
+        data: []
+      }
+      let series = [{
+        data: [],
+        type: "bar"
+      }]
+      for (let i = 0; i < results.length; i++) {
+        let count = await query(`SELECT COUNT(*) as count FROM order_form WHERE user_id=${tokenInfo.userId} AND product_id=${results[i].product_id} AND year(order_form.create_time ) = ${option.year} and month(order_form.create_time )= ${option.month} and day(order_form.create_time ) = ${option.day}`)
+        results[i].count = count[0].count
+        xAxis.data.push(results[i].product_name)
+        series[0].data.push(results[i].count)
+      }
+      let profit = await query(`SELECT SUM(product.selling_price) as sum FROM order_form LEFT JOIN product ON order_form.product_id=product.product_id WHERE order_form.user_id=${tokenInfo.userId} AND year(order_form.create_time ) = ${option.year} and month(order_form.create_time )= ${option.month} and day(order_form.create_time ) = ${option.day};
+      SELECT SUM(product.purchasing_price) as sum FROM order_form LEFT JOIN product ON order_form.product_id=product.product_id WHERE order_form.user_id=${tokenInfo.userId} AND year(order_form.create_time ) = ${option.year} and month(order_form.create_time )= ${option.month} and day(order_form.create_time ) = ${option.day}`)
+      if (!profit[0][0].sum) {
+        profit[0][0].sum = 0
+      }
+      if (!profit[1][0].sum) {
+        profit[1][0].sum = 0
+      }
+      ctx.body = {
+        code: 200,
+        msg: "获取成功",
+        data: {
+          xAxis,
+          series,
+          salesAmount: (profit[0][0].sum).toFixed(2),
+          netIncome: (profit[0][0].sum - profit[1][0].sum).toFixed(2)
+        }
+      };
+    } else {
+      ctx.body = {
+        code: 201,
+        msg: "获取失败"
+      };
+    }
+  }
+})
+//获取月份报表
+router.get('/monthStatistics', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    let days = getDay(option.year, option.month.toString())
+    let results = []
+    for (let i = 0; i < days; i++) {
+      let res = await query(`SELECT SUM(product.selling_price) as sum FROM order_form LEFT JOIN product ON order_form.product_id=product.product_id WHERE order_form.user_id=${tokenInfo.userId} AND year(order_form.create_time ) = ${option.year} and month(order_form.create_time )= ${option.month} and day(order_form.create_time ) = ${i+1}`)
+      if (!res[0].sum) {
+        res[0].sum = 0
+      }
+      results.push(res[0].sum)
+    }
+    let series = [{
+      type: "line",
+      showSymbol: false,
+      data: results
+    }]
+    let profit = await query(`SELECT SUM(product.selling_price) as sum FROM order_form LEFT JOIN product ON order_form.product_id=product.product_id WHERE order_form.user_id=${tokenInfo.userId} AND year(order_form.create_time ) = ${option.year} and month(order_form.create_time )= ${option.month};
+    SELECT SUM(product.purchasing_price) as sum FROM order_form LEFT JOIN product ON order_form.product_id=product.product_id WHERE order_form.user_id=${tokenInfo.userId} AND year(order_form.create_time ) = ${option.year} and month(order_form.create_time )= ${option.month}`)
+    if (!profit[0][0].sum) {
+      profit[0][0].sum = 0
+    }
+    if (!profit[1][0].sum) {
+      profit[1][0].sum = 0
+    }
+    ctx.body = {
+      code: 200,
+      msg: "获取成功",
+      data: {
+        series,
+        salesAmount: (profit[0][0].sum).toFixed(2),
+        netIncome: (profit[0][0].sum - profit[1][0].sum).toFixed(2)
+      }
+    };
+  }
+})
+//获取月份报表
+router.get('/yearStatistics', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.query
+    let eatInList = [] //堂食的数据
+    let takeOutList = [] //外卖的数据
+    let netIncomeList = [] //纯收入的数据
+    let salesAmount = 0 //总销售额
+    let purchasingPrice = 0 //总进价
+    for (let i = 1; i < 13; i++) {
+      let res = await query(`SELECT COUNT(*) as count FROM order_form LEFT JOIN product ON order_form.product_id=product.product_id WHERE order_form.user_id=${tokenInfo.userId} AND year(order_form.create_time ) = ${option.year} and month(order_form.create_time )= ${i} AND order_form.kind="堂食/打包";
+      SELECT COUNT(*) as count FROM order_form LEFT JOIN product ON order_form.product_id=product.product_id WHERE order_form.user_id=${tokenInfo.userId} AND year(order_form.create_time ) = ${option.year} and month(order_form.create_time )= ${i};
+      SELECT SUM(product.selling_price) as sum FROM order_form LEFT JOIN product ON order_form.product_id=product.product_id WHERE order_form.user_id=${tokenInfo.userId} AND year(order_form.create_time ) = ${option.year} and month(order_form.create_time )= ${i};
+      SELECT SUM(product.purchasing_price) as sum FROM order_form LEFT JOIN product ON order_form.product_id=product.product_id WHERE order_form.user_id=${tokenInfo.userId} AND year(order_form.create_time ) = ${option.year} and month(order_form.create_time )= ${i}`)
+      eatInList.push(res[0][0].count)
+      takeOutList.push(res[1][0].count - res[0][0].count)
+      salesAmount = salesAmount + res[2][0].sum
+      purchasingPrice = purchasingPrice + res[3][0].sum
+      netIncomeList.push((res[2][0].sum - res[3][0].sum).toFixed(2))
+    }
 
-
-
-
-
-
+    ctx.body = {
+      code: 200,
+      msg: "获取成功",
+      data: {
+        eatInList,
+        takeOutList,
+        netIncomeList,
+        salesAmount,
+        netIncome: (salesAmount - purchasingPrice).toFixed(2)
+      }
+    };
+  }
+})
+//原密码验证
+router.post('/pawVerify', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.request.body; //接收参数
+    let sql = `SELECT * FROM user WHERE id=${tokenInfo.userId} and password="${md5(option.password)}"`;
+    await query(sql).then((results) => {
+      if (results.length > 0) {
+        ctx.body = {
+          code: 200,
+          msg: "密码正确!"
+        };
+      } else {
+        ctx.body = {
+          code: 201,
+          msg: "密码有误!",
+        };
+      }
+    })
+  }
+})
+//修改密码
+router.post('/alterPassword', async (ctx, next) => {
+  let tokenInfo = await judgeToken(ctx.headers.token)
+  if (tokenInfo.code === -1) {
+    ctx.body = {
+      code: -1,
+      msg: "token不合法,请重新登录"
+    }
+    return
+  } else {
+    let option = ctx.request.body; //接收参数
+    let sql = `UPDATE user SET password="${md5(option.password)}" WHERE id=${tokenInfo.userId}`;
+    await query(sql).then((results) => {
+      if (results.affectedRows > 0) {
+        ctx.body = {
+          code: 200,
+          msg: "密码修改成功!",
+        };
+      } else {
+        ctx.body = {
+          code: 201,
+          msg: "密码修改失败!",
+        };
+      }
+    })
+  }
+})
 
 
 

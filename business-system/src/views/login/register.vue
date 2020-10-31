@@ -1,12 +1,7 @@
 <template>
   <div class="register">
     <div class="inp">
-      <el-input
-        placeholder="用户名"
-        v-model="name"
-        clearable
-        :maxlength="11"
-      >
+      <el-input placeholder="用户名" v-model="name" clearable :maxlength="11">
       </el-input>
       <div class="email">
         <el-input :placeholder="emailPlaceholder" v-model="email" clearable>
@@ -84,7 +79,7 @@ export default {
         this.$message.error("新密码必须由 4-16位字母、数字、特殊符号线组成!");
       } else if (this.password !== this.password2) {
         this.$message.error("两次密码不一致,请重新输入!");
-      } else if (this.registerCode !== "王建炜天下第一帅") {
+      } else if (this.registerCode !== "daixu") {
         this.$message.error("无效的非法注册码!");
       } else {
         registerUser(this.name, this.finalEmail, this.password).then(res => {

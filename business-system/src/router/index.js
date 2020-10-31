@@ -3,12 +3,14 @@ import VueRouter from "vue-router";
 
 Vue.use(VueRouter);
 
-const routes = [{
+const routes = [
+  {
     path: "/",
     name: "LoginIndex",
     component: () => import("@/views/Login/index.vue"),
     redirect: "/login",
-    children: [{
+    children: [
+      {
         path: "/login",
         name: "Login",
         component: () => import("@/views/Login/login.vue")
@@ -30,7 +32,8 @@ const routes = [{
     name: "Console",
     component: () => import("@/views/Console/console.vue"),
     redirect: "/product",
-    children: [{
+    children: [
+      {
         path: "/product",
         name: "Product",
         component: () => import("@/views/Console/Product/product.vue")
@@ -73,16 +76,19 @@ const routes = [{
       {
         path: "/dayStatement",
         name: "DayStatement",
-        component: () => import("@/views/Console/IncomeStatistics/dayStatement.vue")
-      }, {
+        component: () => import("@/views/Console/statistics/dayStatement.vue")
+      },
+      {
         path: "/monthStatement",
         name: "MonthStatement",
-        component: () => import("@/views/Console/IncomeStatistics/monthStatement.vue")
-      }, {
+        component: () => import("@/views/Console/statistics/monthStatement.vue")
+      },
+      {
         path: "/yearStatement",
         name: "YearStatement",
-        component: () => import("@/views/Console/IncomeStatistics/yearStatement.vue")
-      },{
+        component: () => import("@/views/Console/statistics/yearStatement.vue")
+      },
+      {
         path: "/operatingRecord",
         name: "OperatingRecord",
         component: () => import("@/views/Console/System/operatingRecord.vue")
@@ -102,13 +108,18 @@ const router = new VueRouter({
   routes
 });
 router.beforeEach((to, from, next) => {
-  if (localStorage.getItem("token")) { //判断是否需要登录
-    next()
+  if (localStorage.getItem("token")) {
+    //判断是否需要登录
+    next();
   } else {
-    if (to.name !== "Login" && to.name !== "ForgetPwd" && to.name !== "Register") {
-      next("/login")
+    if (
+      to.name !== "Login" &&
+      to.name !== "ForgetPwd" &&
+      to.name !== "Register"
+    ) {
+      next("/login");
     } else {
-      next()
+      next();
     }
   }
 });

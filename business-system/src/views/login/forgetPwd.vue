@@ -52,7 +52,7 @@ export default {
     return {
       name: "",
       email: "",
-      finalEmail: "",   //最后保存的邮箱
+      finalEmail: "", //最后保存的邮箱
       password: "",
       password2: "",
       getCaptchaTxt: "获取验证码",
@@ -84,7 +84,7 @@ export default {
               type: "success"
             });
           } else {
-            this.$message.error('用户名与邮箱不匹配!');
+            this.$message.error("用户名与邮箱不匹配!");
           }
         });
       }

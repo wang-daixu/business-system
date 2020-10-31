@@ -3,11 +3,11 @@ import axios from "axios";
 const BASEURL = process.env.NODE_ENV === "development" ? "/" : "";
 const service = axios.create({
   baseURL: BASEURL,
-  timeout: 1000*30,
+  timeout: 1000 * 30,
   headers: {
     "content-type": "application/json",
-    "token": localStorage.getItem("token")
-}
+    token: localStorage.getItem("token")
+  }
 });
 
 // 添加请求拦截器
@@ -25,8 +25,8 @@ service.interceptors.request.use(
 // 添加响应拦截器
 service.interceptors.response.use(
   function(response) {
-    // if(response.data){
-    //   localStorage.clear();
+    // if(response.data.code===-1){
+    //   localStorage.removeItem("token");
     // }
     // 对响应数据做点什么
     return response;

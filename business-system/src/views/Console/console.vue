@@ -64,7 +64,7 @@
               <el-submenu index="5">
                 <template slot="title">
                   <i class="el-icon-s-data"></i>
-                  <span>营收状况</span>
+                  <span>销量报表</span>
                 </template>
                 <el-menu-item-group>
                   <el-menu-item index="dayStatement">当日报表</el-menu-item>
@@ -116,18 +116,18 @@
 export default {
   data() {
     return {
-      currentPath:"",
+      currentPath: "",
       userName: localStorage.getItem("userName")
     };
   },
   created() {
-    this.currentPath = this.$route.path.substr(1)
+    this.currentPath = this.$route.path.substr(1);
   },
-  watch:{
-  $route(to){
-    this.currentPath = to.path.substr(1)
-  }
-},
+  watch: {
+    $route(to) {
+      this.currentPath = to.path.substr(1);
+    }
+  },
   methods: {
     quit() {
       this.$confirm("是否确认退出,下次将要重新登录?", "退出提示", {
@@ -135,7 +135,7 @@ export default {
         cancelButtonText: "取消",
         type: "warning"
       }).then(() => {
-        localStorage.clear();
+        localStorage.removeItem("token");
         this.$router.replace({ name: "Login" });
       });
     }

@@ -217,9 +217,9 @@
   </el-container>
 </template>
 
-
 <script>
 import {
+  getUserToken,
   getClassifyList,
   searchList,
   getProductList,
@@ -258,7 +258,7 @@ export default {
         selling_price: null,
         classify: null,
         classify_id: null,
-        exchangeIntegral:null,
+        exchangeIntegral: null,
         classifyList: []
       },
       uploadData: { key: "", token: "" }, //key为上传的文件名
@@ -268,25 +268,35 @@ export default {
     };
   },
   created() {
-    getClassifyList().then(res => {
-      //获取产品分类列表
-      this.options = res.data.data.classifyList;
-    });
-    getProductList(this.currentPage, this.pageSize).then(res => {
-      //获取全部产品列表
+    getUserToken().then(res => {
       if (res.data.code === 200) {
-        this.tableData = res.data.data.productList;
-        this.total = res.data.data.total;
-      }
-    });
-    addProductClassifyList().then(res => {
-      //获取编辑弹窗内分类列表
-      this.formLabelAlign.classifyList = res.data.data;
-    });
-    getUploadToken().then(res => {
-      //获取七牛云上传token
-      if (res.data.code === 200) {
-        this.uploadData.token = res.data.data.uploadToken;
+        if (localStorage.getItem("token") !== res.data.data) {
+          this.$router.go(0);
+          return;
+        }
+        getClassifyList().then(res => {
+          //获取产品分类列表
+          this.options = res.data.data.classifyList;
+        });
+        getProductList(this.currentPage, this.pageSize).then(res => {
+          //获取全部产品列表
+          if (res.data.code === 200) {
+            this.tableData = res.data.data.productList;
+            this.total = res.data.data.total;
+          }
+        });
+        addProductClassifyList().then(res => {
+          //获取编辑弹窗内分类列表
+          this.formLabelAlign.classifyList = res.data.data;
+        });
+        getUploadToken().then(res => {
+          //获取七牛云上传token
+          if (res.data.code === 200) {
+            this.uploadData.token = res.data.data.uploadToken;
+          }
+        });
+      } else {
+        this.$router.go(0);
       }
     });
   },
@@ -325,11 +335,11 @@ export default {
         this.$message.error("上传头像图片大小不能超过 2MB!");
         return false;
       }
-      this.uploadData.key=""
+      this.uploadData.key = "";
       for (let i = 0; i < 5; i++) {
         this.uploadData.key = this.uploadData.key + getRandom(0, 9);
       }
-      this.uploadData.key = `${new Date().getTime()}` +this.uploadData.key;
+      this.uploadData.key = `${new Date().getTime()}` + this.uploadData.key;
     },
     uploadError(err, file, fileList) {
       //上传失败调用
@@ -460,7 +470,7 @@ export default {
       this.formLabelAlign.selling_price = row.selling_price;
       this.formLabelAlign.classify = row.classify;
       this.formLabelAlign.classify_id = row.classify_id;
-      this.formLabelAlign.exchangeIntegral = row.exchangeIntegral
+      this.formLabelAlign.exchangeIntegral = row.exchangeIntegral;
       this.editBounced = true;
     },
     handleDelete(index, row) {

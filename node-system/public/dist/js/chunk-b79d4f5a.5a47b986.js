@@ -1,2 +1,0 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-b79d4f5a"],{4138:function(e,n,t){"use strict";var c=t("74de"),r=t.n(c);r.a},"74de":function(e,n,t){},"88a3":function(e,n,t){"use strict";t.r(n);var c=function(){var e=this,n=e.$createElement;e._self._c;return e._m(0)},r=[function(){var e=this,n=e.$createElement,t=e._self._c||n;return t("div",[t("h1",[e._v("所有产品")])])}],u=(t("4138"),t("2877")),a={},i=Object(u["a"])(a,c,r,!1,null,"61fe600b",null);n["default"]=i.exports}}]);
-//# sourceMappingURL=chunk-b79d4f5a.5a47b986.js.map

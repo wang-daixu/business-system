@@ -15,7 +15,7 @@ router.post('/login', async (ctx, next) => {
   let option = ctx.request.body; //接收参数
   let sql = `SELECT * FROM user WHERE name="${option.name}" and password="${md5(option.password)}"`;
   await query(sql).then((results) => {
-    if (results.length >= 0) {
+    if (results.length > 0) {
       let token = jwt.sign({    //生成token
         userId:results[0].id,
         name: option.name,

@@ -144,7 +144,6 @@
   </el-container>
 </template>
 
-
 <script>
 import {
   getClassifyList,
@@ -308,7 +307,7 @@ export default {
         }).then(() => {
           this.addBounced = true;
         });
-      }else{
+      } else {
         this.addBounced = true;
       }
     },

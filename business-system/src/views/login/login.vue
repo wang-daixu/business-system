@@ -32,8 +32,8 @@ import { login } from "@/api/login";
 export default {
   data() {
     return {
-      name: "admin",
-      password: "admin"
+      name: localStorage.getItem("userName"),
+      password: ""
     };
   },
   methods: {
@@ -45,21 +45,22 @@ export default {
       } else {
         login(this.name, this.password).then(res => {
           if (res.data.code === 200) {
-            localStorage.setItem('token',res.data.data.token)
-            localStorage.setItem('userName',this.name)
-            localStorage.setItem('userId',res.data.data.userId)
-            this.$router.replace({name:'Console'})
-          }else{
+            localStorage.setItem("token", res.data.data.token);
+            localStorage.setItem("userName", this.name);
+            localStorage.setItem("userId", res.data.data.userId);
+            this.$router.replace({ name: "Console" });
+          } else {
             this.$message.error("用户名或密码输入错误!");
           }
         });
       }
     },
-    skip(e){  //选择点击的是忘记密码还是立即注册
-      if(e==='忘记密码'){
-        this.$router.replace({name:'ForgetPwd'})
-      }else{
-        this.$router.replace({name:'Register'})
+    skip(e) {
+      //选择点击的是忘记密码还是立即注册
+      if (e === "忘记密码") {
+        this.$router.replace({ name: "ForgetPwd" });
+      } else {
+        this.$router.replace({ name: "Register" });
       }
     }
   }

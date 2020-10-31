@@ -38,13 +38,22 @@
           </el-input>
         </el-form-item>
         <el-form-item label="产品进价">
-          <el-input v-model="formLabelAlign.purchasing_price" class="price"></el-input>
+          <el-input
+            v-model="formLabelAlign.purchasing_price"
+            class="price"
+          ></el-input>
         </el-form-item>
         <el-form-item label="产品售价">
-          <el-input v-model="formLabelAlign.selling_price" class="price"></el-input>
+          <el-input
+            v-model="formLabelAlign.selling_price"
+            class="price"
+          ></el-input>
         </el-form-item>
-         <el-form-item label="获得积分">
-          <el-input v-model="formLabelAlign.exchangeIntegral" class="price"></el-input>
+        <el-form-item label="获得积分">
+          <el-input
+            v-model="formLabelAlign.exchangeIntegral"
+            class="price"
+          ></el-input>
         </el-form-item>
         <el-form-item label="库存状态">
           <el-radio v-model="formLabelAlign.inventory" :label="0"
@@ -55,10 +64,7 @@
           >
         </el-form-item>
         <el-form-item label="产品分类">
-          <el-select
-            v-model="formLabelAlign.classify"
-            placeholder="请选择"
-          >
+          <el-select v-model="formLabelAlign.classify" placeholder="请选择">
             <el-option
               v-for="item in formLabelAlign.classifyList"
               :key="item.value"
@@ -99,7 +105,7 @@ export default {
         selling_price: null,
         inventory: 0,
         classify: null,
-        exchangeIntegral:null,
+        exchangeIntegral: null,
         classifyList: []
       }
     };
@@ -198,7 +204,7 @@ export default {
       for (let i = 0; i < 5; i++) {
         this.uploadData.key = this.uploadData.key + getRandom(0, 9);
       }
-      this.uploadData.key = `${new Date().getTime()}` +this.uploadData.key;
+      this.uploadData.key = `${new Date().getTime()}` + this.uploadData.key;
     },
     /**
      * 上传失败调用
@@ -250,8 +256,8 @@ export default {
   height: 100%;
   .el-main {
     background-color: white;
-    .price{
-      /deep/ .el-input__inner{
+    .price {
+      /deep/ .el-input__inner {
         width: 20%;
       }
     }

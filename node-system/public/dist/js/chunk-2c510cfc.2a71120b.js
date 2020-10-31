@@ -1,2 +1,0 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2c510cfc"],{"20fd":function(e,n,c){},"7e1a":function(e,n,c){"use strict";c.r(n);var t=function(){var e=this,n=e.$createElement;e._self._c;return e._m(0)},r=[function(){var e=this,n=e.$createElement,c=e._self._c||n;return c("div",[c("h1",[e._v("按年查询收入状况")])])}],u=(c("95e4"),c("2877")),a={},f=Object(u["a"])(a,t,r,!1,null,"6f5cacd2",null);n["default"]=f.exports},"95e4":function(e,n,c){"use strict";var t=c("20fd"),r=c.n(t);r.a}}]);
-//# sourceMappingURL=chunk-2c510cfc.2a71120b.js.map

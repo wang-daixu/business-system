@@ -63,9 +63,8 @@
   </el-container>
 </template>
 
-
 <script>
-import { forRecord, searchForRecord,deleteForRecord } from "@/api/integral";
+import { forRecord, searchForRecord, deleteForRecord } from "@/api/integral";
 import FileSaver from "file-saver";
 import XLSX from "xlsx";
 export default {
@@ -87,13 +86,14 @@ export default {
   methods: {
     //获取全部列表
     getForRecord(currentPage, pageSize) {
-        this.pagingCall = 0;
+      this.pagingCall = 0;
       forRecord(currentPage, pageSize).then(res => {
         if (res.data.code === 200) {
           this.tableData = res.data.data.forRecordList;
           this.total = res.data.data.total;
         } else {
           this.tableData = [];
+          this.total = 0;
         }
       });
     },
@@ -112,6 +112,7 @@ export default {
               this.total = res.data.data.total;
             } else {
               this.tableData = [];
+              this.total = 0;
             }
           }
         );

@@ -1,5 +1,5 @@
 import service from "@/utils/request";
-import sha1 from "sha1"
+import sha1 from "sha1";
 // 登录验证
 export async function login(name, password) {
   const data = service.request({
@@ -7,7 +7,7 @@ export async function login(name, password) {
     url: "/user/login",
     data: {
       name,
-      password:sha1(password)
+      password: sha1(password)
     }
   });
   return data;
@@ -27,14 +27,14 @@ export async function getPwdCaptcha(name, email) {
 }
 
 // 修改密码
-export async function updatePassword(name, email,password) {
+export async function updatePassword(name, email, password) {
   const data = service.request({
     method: "post",
     url: "/user/changePassword",
     data: {
       name,
       email,
-      password:sha1(password)
+      password: sha1(password)
     }
   });
   return data;
@@ -51,16 +51,15 @@ export async function getCaptcha(email) {
   return data;
 }
 // 用户注册
-export async function registerUser(name, email,password) {
+export async function registerUser(name, email, password) {
   const data = service.request({
     method: "post",
     url: "/user/register",
     data: {
       name,
       email,
-      password:sha1(password)
+      password: sha1(password)
     }
   });
   return data;
 }
-
